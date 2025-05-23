@@ -1,0 +1,28 @@
+package com.middleware.invoice_ems.Repository;
+
+
+import com.middleware.invoice_ems.Entity.Invoice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
+
+//    List<Invoice> findByClientAndStatus(Client client);
+
+    @Query("SELECT COUNT(i) FROM Invoice i " +
+            "WHERE FUNCTION('MONTH', i.issueDate) = :month " +
+            "AND FUNCTION('YEAR', i.issueDate) = :year " +
+            "AND i.client.id IN (SELECT c.id FROM Client c WHERE c.clientName = :clientName)")
+    Long countInvoicesByClientAndMonth(@Param("month") int month,
+                                       @Param("year") int year,
+                                       @Param("clientName") String clientName);
+
+
+
+
+}
