@@ -1,8 +1,12 @@
 package com.middleware.invoice_ems.DTO;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import com.middleware.invoice_ems.Entity.InvoiceStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,10 +22,10 @@ public class InvoiceDTO {
     @JsonProperty("invoiceNumber")
     private String invoiceNumber;
 
-    @JsonProperty("issueDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate issueDate;
 
-    @JsonProperty("dueDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
     @JsonProperty("totalAmount")
     private BigDecimal totalAmount;
@@ -32,12 +36,19 @@ public class InvoiceDTO {
     private String invoiceType;
     @JsonProperty("tax")
     private BigDecimal tax;
+
+    private String country;
 //    @JsonProperty("status")
 //    private String status;
     @JsonProperty("client")
     private ClientDTO client;
+
     @JsonProperty("invoiceItems")
     private List<InvoiceItemDTO> invoiceItems;
+
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus invoiceStatus;
+
 //    @JsonProperty("payments")
 //    private List<PaymentDTO> payments;
 
@@ -119,5 +130,21 @@ public class InvoiceDTO {
 
     public void setInvoiceType(String invoiceType) {
         this.invoiceType = invoiceType;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public InvoiceStatus getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(InvoiceStatus invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
     }
 }

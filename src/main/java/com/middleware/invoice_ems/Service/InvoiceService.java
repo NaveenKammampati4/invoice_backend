@@ -1,17 +1,21 @@
 package com.middleware.invoice_ems.Service;
 
 import com.middleware.invoice_ems.DTO.ClientDTO;
+import com.middleware.invoice_ems.DTO.CountInvoicesDTO;
 import com.middleware.invoice_ems.DTO.InvoiceDTO;
 import com.middleware.invoice_ems.DTO.InvoiceItemDTO;
 import com.middleware.invoice_ems.Entity.Client;
 import com.middleware.invoice_ems.Entity.Invoice;
 import com.middleware.invoice_ems.Entity.InvoiceItem;
 //import com.middleware.invoice_ems.Exception.ResourceNotFoundException;
+import com.middleware.invoice_ems.Entity.InvoiceStatus;
 import com.middleware.invoice_ems.Repository.ClientRepository;
 import com.middleware.invoice_ems.Repository.InvoiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,12 +48,27 @@ public class InvoiceService {
 //        }
             Client newClient = invoice.getClient();
             System.out.println(" Client Details "+invoice.getClient().toString());
+            invoice.setInvoiceStatus(InvoiceStatus.PENDING);
             clientRepository.save(newClient);
             invoice.setClient(newClient);
             Invoice savedInvoice = invoiceRepository.save(invoice);
 
-            emailService.notifyClient(savedInvoice.getClient());
+//            emailService.notifyClient(savedInvoice.getClient());
         return savedInvoice;
+    }
+
+    public Invoice paidInvoice(int id){
+        Invoice approve = invoiceRepository.findById(id).orElseThrow(() -> new RuntimeException("Invoice Id not found"));
+        approve.setInvoiceStatus(InvoiceStatus.PAID);
+        invoiceRepository.save(approve);
+        return approve;
+    }
+
+    public Invoice overDueInvoice(int id){
+        Invoice overDue = invoiceRepository.findById(id).orElseThrow(() -> new RuntimeException("Invoice Id not found"));
+        overDue.setInvoiceStatus(InvoiceStatus.OVERDUE);
+        invoiceRepository.save(overDue);
+        return overDue;
     }
 
     public Invoice updateInvoice(int id, InvoiceDTO invoiceDTO) {
@@ -59,9 +78,29 @@ public class InvoiceService {
         return invoiceRepository.save(existingInvoice);
     }
 
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void updateOverdueInvoices(){
+        List<Invoice> pendingInvoices = invoiceRepository.findByInvoiceStatus(InvoiceStatus.PENDING);
+        LocalDate today = LocalDate.now();
+        for(Invoice invoice: pendingInvoices){
+            if(invoice.getDueDate()!=null && invoice.getDueDate().isBefore(today)){
+                invoice.setInvoiceStatus(InvoiceStatus.OVERDUE);
+            }
+        }
+        invoiceRepository.saveAll(pendingInvoices);
+    }
+
     public Invoice getInvoice(int id) {
         return invoiceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Invoice Id not found"));
+    }
+
+    public List<CountInvoicesDTO> getAllInvoiceData(){
+        List<CountInvoicesDTO> invoiceData = invoiceRepository.countAllInvoices();
+        if (invoiceData.isEmpty()){
+            throw new RuntimeException("No Invoice Data Found");
+        }
+        return invoiceData;
     }
 
     public List<Invoice> getAllInvoices() {
@@ -77,6 +116,8 @@ public class InvoiceService {
         invoice.setTax(dto.getTax());
         invoice.setCompanyName(dto.getCompanyName());
         invoice.setInvoiceType(dto.getInvoiceType());
+        invoice.setInvoiceStatus(dto.getInvoiceStatus());
+        invoice.setCountry(dto.getCountry());
         if (dto.getClient() != null) {
             Client client = new Client();
             client.setClientName(dto.getClient().getClientName());
@@ -124,6 +165,26 @@ public class InvoiceService {
         return invoiceRepository.countInvoicesByClientAndMonth(month, year, clientName);
     }
 
+    public List<Invoice> getInvoicesByStatus(InvoiceStatus invoiceStatus){
+       try{
+           return invoiceRepository.findByInvoiceStatus(invoiceStatus);
+       }catch (Exception e){
+           throw new RuntimeException("NO Invoice status Found"+e.getMessage());
+       }
+    }
+
+    public List<Invoice> getInvoicesByStatuses(List<InvoiceStatus> statuses){
+        try{
+            return invoiceRepository.findByInvoiceStatusIn(statuses);
+        } catch (Exception e) {
+            throw new RuntimeException("No Invoices status found"+e.getMessage());
+        }
+    }
+
+    public List<Invoice> getAllPendingInvoices(){
+        return invoiceRepository.findByInvoiceStatus(InvoiceStatus.PENDING);
+    }
+
     private void updateInvoiceFields(Invoice invoice, InvoiceDTO dto) {
         invoice.setInvoiceNumber(dto.getInvoiceNumber());
         invoice.setIssueDate(dto.getIssueDate());
@@ -132,6 +193,8 @@ public class InvoiceService {
         invoice.setTax(dto.getTax());
         invoice.setCompanyName(dto.getCompanyName());
         invoice.setInvoiceType(dto.getInvoiceType());
+        invoice.setInvoiceStatus(dto.getInvoiceStatus());
+        invoice.setCountry(dto.getCountry());
         if (dto.getInvoiceItems() != null) {
             invoice.getInvoiceItems().clear(); // Clear old items first
             invoice.getInvoiceItems().addAll(dto.getInvoiceItems().stream()
@@ -158,6 +221,8 @@ public class InvoiceService {
         dto.setTax(invoice.getTax());
         dto.setCompanyName(invoice.getCompanyName());
         dto.setInvoiceType(invoice.getInvoiceType());
+        dto.setInvoiceStatus(invoice.getInvoiceStatus());
+        dto.setCountry(invoice.getCountry());
         if (invoice.getClient() != null) {
             ClientDTO clientDTO = new ClientDTO();
             clientDTO.setId(invoice.getClient().getId());

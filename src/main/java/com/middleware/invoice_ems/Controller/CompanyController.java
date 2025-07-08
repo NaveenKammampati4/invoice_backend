@@ -35,4 +35,23 @@ public class CompanyController {
         CompanyDetails companyDetails = companyService.getCompanyDetails(id);
         return ResponseEntity.ok(companyDetails);
     }
+
+
+    @GetMapping("/getByCountry/{country}")
+    public ResponseEntity<List<CompanyDetails>> findByCountry(@PathVariable String country){
+        List<CompanyDetails> companyDetails = companyService.findByCountry(country);
+        return ResponseEntity.ok(companyDetails);
+    }
+
+    @PutMapping("/updateById/{id}")
+    public ResponseEntity<CompanyDetails> updateById(@PathVariable int id, @RequestBody CompanyDetails companyDetails){
+        CompanyDetails updateDetails = companyService.updateCompanyById(id, companyDetails);
+        return ResponseEntity.ok(updateDetails);
+    }
+
+    @DeleteMapping("/deleteById/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable int id){
+        String companyDetails = companyService.deleteById(id);
+        return ResponseEntity.ok(companyDetails);
+    }
 }

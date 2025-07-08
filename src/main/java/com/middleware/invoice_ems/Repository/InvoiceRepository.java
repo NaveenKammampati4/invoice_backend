@@ -1,7 +1,10 @@
 package com.middleware.invoice_ems.Repository;
 
 
+import com.middleware.invoice_ems.DTO.CountInvoicesDTO;
+import com.middleware.invoice_ems.DTO.InvoiceDTO;
 import com.middleware.invoice_ems.Entity.Invoice;
+import com.middleware.invoice_ems.Entity.InvoiceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +25,12 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
                                        @Param("year") int year,
                                        @Param("clientName") String clientName);
 
+    List<Invoice> findByInvoiceStatus(InvoiceStatus invoiceStatus);
+
+    List<Invoice> findByInvoiceStatusIn(List<InvoiceStatus> statuses);
 
 
+    @Query("SELECT new com.middleware.invoice_ems.DTO.CountInvoicesDTO(i.invoiceStatus, COUNT(i)) FROM Invoice i GROUP BY i.invoiceStatus ORDER BY i.invoiceStatus ASC")
+    List<CountInvoicesDTO> countAllInvoices();
 
 }

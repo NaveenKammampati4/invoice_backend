@@ -1,5 +1,6 @@
 package com.middleware.invoice_ems.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,7 @@ public class Client {
     private String clientAddress;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("client")
     private List<Invoice> invoices;
 
     public int getId() {

@@ -28,20 +28,26 @@ public class Invoice {
     private String invoiceType;
     private BigDecimal tax;
     private BigDecimal totalAmount;
+    private String country;
 //    private String status; // DRAFT, SENT, PAID, OVERDUE
 
     @ManyToOne
     @JoinColumn(name = "client_id")
-    @JsonIgnoreProperties("invoice")
+    @JsonIgnoreProperties("invoices")
     private Client client;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("invoice")
     private List<InvoiceItem> invoiceItems;
 
+
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus invoiceStatus;
+
 //    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
 //    @JsonIgnoreProperties("invoice")
 //    private List<Payment> payments;
+
 
 
     public int getId() {
@@ -123,4 +129,21 @@ public class Invoice {
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public InvoiceStatus getInvoiceStatus() {
+        return invoiceStatus;
+    }
+
+    public void setInvoiceStatus(InvoiceStatus invoiceStatus) {
+        this.invoiceStatus = invoiceStatus;
+    }
+
 }

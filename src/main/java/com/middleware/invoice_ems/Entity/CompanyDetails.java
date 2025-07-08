@@ -19,6 +19,7 @@ public class CompanyDetails {
     private String companyEmail;
     private String companyCode;
     private String gstNo;
+    private String country;
     private String companyAddress;
 
     public int getId() {
@@ -67,5 +68,13 @@ public class CompanyDetails {
 
     public void setCompanyAddress(String companyAddress) {
         this.companyAddress = companyAddress;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }
