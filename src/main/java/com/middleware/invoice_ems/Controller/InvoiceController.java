@@ -6,10 +6,12 @@ import com.middleware.invoice_ems.Entity.Invoice;
 import com.middleware.invoice_ems.Entity.InvoiceStatus;
 import com.middleware.invoice_ems.Service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,7 +84,7 @@ public class InvoiceController {
         return ResponseEntity.ok(invoice);
     }
 
-    @GetMapping("/pending")
+    @GetMapping("/pendingInvoices")
     public ResponseEntity<List<Invoice>> getAllPendingInvoices(){
         List<Invoice> pendingInvoices = invoiceService.getAllPendingInvoices();
         if (pendingInvoices.isEmpty()){
@@ -91,10 +93,28 @@ public class InvoiceController {
         return ResponseEntity.ok(pendingInvoices);
     }
 
+    @GetMapping("/overDueInvoices")
+    public ResponseEntity<List<Invoice>> getAllOverdueInvoices(){
+        List<Invoice> overDue = invoiceService.getAllOverdueInvoices();
+        return ResponseEntity.ok(overDue);
+    }
+
+    @GetMapping("/paidInvoices")
+    public ResponseEntity<List<Invoice>> getAllPaidInvoices(){
+        List<Invoice> paidInvoices = invoiceService.getAllPaidInvoices();
+        return ResponseEntity.ok(paidInvoices);
+    }
+
     @PutMapping("/paid/{id}")
     public ResponseEntity<String> paidInvoice(@PathVariable int id){
         invoiceService.paidInvoice(id);
         return ResponseEntity.ok("Invoice Status Updated Successfully");
+    }
+
+    @GetMapping("/fetchByDate")
+    public ResponseEntity<List<Invoice>> fetchByIssueDateAndDueDate(@RequestParam LocalDate issueDate, @RequestParam LocalDate dueDate){
+        List<Invoice> invoiceData = invoiceService.fetchByIssueDateAndDueDate(issueDate, dueDate);
+        return ResponseEntity.ok(invoiceData);
     }
 
     @GetMapping("/getInvoiceData")

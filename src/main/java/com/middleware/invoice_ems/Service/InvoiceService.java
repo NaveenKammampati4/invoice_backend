@@ -185,6 +185,17 @@ public class InvoiceService {
         return invoiceRepository.findByInvoiceStatus(InvoiceStatus.PENDING);
     }
 
+    public List<Invoice> getAllPaidInvoices(){
+        return invoiceRepository.findByInvoiceStatus(InvoiceStatus.PAID);
+    }
+
+    public List<Invoice> getAllOverdueInvoices(){
+        return invoiceRepository.findByInvoiceStatus(InvoiceStatus.OVERDUE);
+    }
+
+    public List<Invoice> fetchByIssueDateAndDueDate(LocalDate issueDate, LocalDate dueDate){
+        return invoiceRepository.fetchByIssueAndDueDates(issueDate,dueDate);
+    }
     private void updateInvoiceFields(Invoice invoice, InvoiceDTO dto) {
         invoice.setInvoiceNumber(dto.getInvoiceNumber());
         invoice.setIssueDate(dto.getIssueDate());

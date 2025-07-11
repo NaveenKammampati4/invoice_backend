@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -32,5 +33,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
 
     @Query("SELECT new com.middleware.invoice_ems.DTO.CountInvoicesDTO(i.invoiceStatus, COUNT(i)) FROM Invoice i GROUP BY i.invoiceStatus ORDER BY i.invoiceStatus ASC")
     List<CountInvoicesDTO> countAllInvoices();
+
+    @Query("SELECT i FROM Invoice i WHERE i.issueDate >= :issueDate AND i.dueDate <= :dueDate")
+    List<Invoice> fetchByIssueAndDueDates(@Param("issueDate") LocalDate issueDate,
+                                          @Param("dueDate") LocalDate dueDate);
+
 
 }
